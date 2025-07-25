@@ -76,10 +76,43 @@ fn respond_ok_json(
 }
 
 const INTERACTION_PING: i64 = 1;
+const INTERACTION_APP_CMD: i64 = 2;
 
 fn pong(writer: &mut BufWriter<&TcpStream>) -> io::Result<()> {
     let body = json!({"type":1});
     respond_ok_json(&body, writer)
+}
+
+fn hello_world(writer: &mut BufWriter<&TcpStream>) -> io::Result<()> {
+    let body = json!({
+        "type": 4,
+        "data": {
+            "content": "Hello, World!"
+        }
+    });
+    respond_ok_json(&body, writer)
+}
+
+fn app_cmd(
+    interaction_obj: &serde_json::Value,
+    writer: &mut BufWriter<&TcpStream>,
+) -> io::Result<()> {
+    const INVALID_DATA: io::ErrorKind = io::ErrorKind::InvalidData;
+
+    let interaction_data = interaction_obj
+        .get("data")
+        .ok_or::<io::Error>(INVALID_DATA.into())?;
+
+    let name = interaction_data
+        .get("name")
+        .ok_or::<io::Error>(INVALID_DATA.into())?
+        .as_str()
+        .ok_or::<io::Error>(INVALID_DATA.into())?;
+
+    match name {
+        "hello" => hello_world(writer),
+        _ => Err(INVALID_DATA.into()),
+    }
 }
 
 pub fn interactions(
@@ -109,6 +142,7 @@ pub fn interactions(
 
     match interaction_type {
         INTERACTION_PING => pong(&mut writer),
+        INTERACTION_APP_CMD => app_cmd(&object, &mut writer),
         _ => Err(INVALID_DATA.into()),
     }
 }
