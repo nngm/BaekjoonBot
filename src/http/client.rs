@@ -1,6 +1,7 @@
 use std::{
     io::{self, BufWriter, prelude::*},
     net::TcpStream,
+    time::Duration,
     sync::Arc,
 };
 
@@ -36,9 +37,9 @@ pub fn https_request(
     )
     .or::<io::Error>(Err(INVALID_INPUT.into()))?;
     let mut sock = TcpStream::connect(url_with_port.as_str())?;
+    sock.set_read_timeout(Some(Duration::new(30, 0)))?;
 
     let mut tls = rustls::Stream::new(&mut conn, &mut sock);
-
     {
         let mut writer = BufWriter::new(&mut tls);
         writer.write_all(
@@ -53,6 +54,7 @@ pub fn https_request(
         )?;
 
         writer.write_all(["Host: ", url, "\r\n"].concat().as_bytes())?;
+        writer.write_all(b"Connection: close\r\n")?;
 
         for header in headers {
             writer.write_all(
