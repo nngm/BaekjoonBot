@@ -33,3 +33,19 @@ impl TryFrom<&str> for Method {
         }
     }
 }
+
+impl Into<&[u8]> for Method {
+    fn into(self) -> &'static [u8] {
+        match self {
+            Method::Get => b"GET",
+            Method::Head => b"HEAD",
+            Method::Post => b"POST",
+            Method::Put => b"PUT",
+            Method::Delete => b"DELETE",
+            Method::Connect => b"CONNECT",
+            Method::Options => b"OPTIONS",
+            Method::Trace => b"TRACE",
+            Method::Patch => b"PATCH",
+        }
+    }
+}
