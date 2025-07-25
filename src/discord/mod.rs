@@ -1,6 +1,6 @@
 pub mod server;
 
-struct env {
+struct Env {
     token: &'static str,
     pubkey: &'static str,
 }
@@ -20,13 +20,13 @@ const fn find_until(slice: &[u8], target: u8) -> Option<usize> {
     }
 }
 
-const ENV: env = {
-    const dotenv: &[u8] = include_bytes!("../../.env");
+const ENV: Env = {
+    const DOTENV: &[u8] = include_bytes!("../../.env");
     let mut token = None;
     let mut pubkey = None;
 
     let mut i = 0;
-    let mut left = dotenv;
+    let mut left = DOTENV;
     loop {
         if token.is_some() && pubkey.is_some() {
             break;
@@ -76,7 +76,7 @@ const ENV: env = {
         i += 1;
     }
 
-    env {
+    Env {
         token: token.unwrap(),
         pubkey: pubkey.unwrap(),
     }
