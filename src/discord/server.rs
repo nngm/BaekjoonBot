@@ -5,8 +5,8 @@ use std::{
     net::TcpStream,
 };
 
-use crate::http::{self, Method, server::RequestHeader};
 use super::ENV;
+use crate::http::{self, Method, server::RequestHeader};
 
 fn parse_hex_str(string: &str) -> Option<Vec<u8>> {
     let len = string.len();
@@ -47,8 +47,7 @@ fn verify_interaction(req_header: &RequestHeader, body: &[u8]) -> Result<(), Uns
 
     let key = signature::UnparsedPublicKey::new(
         &signature::ED25519,
-        parse_hex_str(ENV.pubkey)
-            .ok_or(Unspecified)?,
+        parse_hex_str(ENV.pubkey).ok_or(Unspecified)?,
     );
 
     key.verify(&message, &sig)
@@ -110,8 +109,6 @@ pub fn interactions(
 
     match interaction_type {
         INTERACTION_PING => pong(&mut writer),
-        _ => {
-            Err(INVALID_DATA.into())
-        }
+        _ => Err(INVALID_DATA.into()),
     }
 }
