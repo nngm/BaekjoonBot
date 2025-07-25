@@ -3,6 +3,7 @@ pub mod server;
 struct Env {
     token: &'static str,
     pubkey: &'static str,
+    appid: &'static str,
 }
 
 const fn find_until(slice: &[u8], target: u8) -> Option<usize> {
@@ -24,11 +25,12 @@ const ENV: Env = {
     const DOTENV: &[u8] = include_bytes!("../../.env");
     let mut token = None;
     let mut pubkey = None;
+    let mut appid = None;
 
     let mut i = 0;
     let mut left = DOTENV;
     loop {
-        if token.is_some() && pubkey.is_some() {
+        if token.is_some() && pubkey.is_some() && appid.is_some() {
             break;
         }
 
@@ -69,6 +71,21 @@ const ENV: Env = {
                     i = 0;
                     continue;
                 }
+                b"APP_ID" => {
+                    let (_, remainder) = remainder.split_first().unwrap();
+                    let (raw_appid, remainder) =
+                        remainder.split_at(find_until(remainder, b'\n').unwrap());
+                    match str::from_utf8(raw_appid) {
+                        Ok(k) => {
+                            appid = Some(k);
+                        }
+                        Err(_) => panic!(),
+                    }
+                    let (_, remainder) = remainder.split_first().unwrap();
+                    left = remainder;
+                    i = 0;
+                    continue;
+                }
                 _ => panic!(),
             }
         }
@@ -79,5 +96,6 @@ const ENV: Env = {
     Env {
         token: token.unwrap(),
         pubkey: pubkey.unwrap(),
+        appid: appid.unwrap(),
     }
 };
