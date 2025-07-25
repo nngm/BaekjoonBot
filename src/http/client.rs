@@ -1,8 +1,8 @@
 use std::{
     io::{self, BufWriter, prelude::*},
     net::TcpStream,
-    time::Duration,
     sync::Arc,
+    time::Duration,
 };
 
 use rustls;
